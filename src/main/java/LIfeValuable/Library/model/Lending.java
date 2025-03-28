@@ -15,4 +15,14 @@ public class Lending {
     @NotNull LocalDate dueDate;
     LocalDate returnDate;
     LendingStatus status;
+
+    @AssertTrue
+    private boolean isDueDateValid() {
+        return dueDate != null && lendingDate != null && !dueDate.isBefore(lendingDate);
+    }
+
+    @AssertTrue
+    private boolean isReturnDateValid() {
+        return returnDate == null || lendingDate != null && !returnDate.isBefore(lendingDate);
+    }
 }
