@@ -20,13 +20,6 @@ public class ReaderTest extends BaseModelTest<Reader> {
     }
 
     @Test
-    void whenSetNullId_thenValidationFails() {
-        Reader reader = new Reader();
-        reader.setId(null);
-        assertThatPropertyIsNotValid(reader, "id");
-    }
-
-    @Test
     void whenSetBlankFirstName_thenValidationFails() {
         Reader reader = new Reader();
         reader.setFirstName("");

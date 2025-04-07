@@ -20,13 +20,6 @@ public class LendingTest extends BaseModelTest<Lending> {
     }
 
     @Test
-    void whenSetNullId_thenValidationFails() {
-        Lending lending = new Lending();
-        lending.setId(null);
-        assertThatPropertyIsNotValid(lending, "id");
-    }
-
-    @Test
     void whenSetNullBook_thenValidationFails() {
         Lending lending = new Lending();
         lending.setBook(null);

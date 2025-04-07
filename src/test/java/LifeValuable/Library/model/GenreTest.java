@@ -13,13 +13,6 @@ public class GenreTest extends BaseModelTest<Genre> {
     }
 
     @Test
-    void whenSetNullId_thenValidationFails() {
-        Genre genre = new Genre();
-        genre.setId(null);
-        assertThatPropertyIsNotValid(genre, "id");
-    }
-
-    @Test
     void whenSetBlankName_thenValidationFails() {
         Genre genre = new Genre();
         genre.setName("");

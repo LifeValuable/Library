@@ -1,13 +1,17 @@
 package LifeValuable.Library.model;
 
-import lombok.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.*;
-
+@Entity
 @Data
 @NoArgsConstructor
 public class Genre {
-    @NotNull Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @NotBlank String name;
     @NotBlank String description;
 }

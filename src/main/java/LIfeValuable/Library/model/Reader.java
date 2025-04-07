@@ -1,14 +1,18 @@
 package LifeValuable.Library.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
+@Entity
 @Data
 @NoArgsConstructor
 public class Reader {
-    @NotNull Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @NotBlank String firstName;
     @NotBlank String lastName;
     @NotBlank @Email String email;

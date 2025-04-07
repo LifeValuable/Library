@@ -35,13 +35,6 @@ class BookTest extends BaseModelTest<Book>{
     }
 
     @Test
-    void whenSetNullId_thenValidationFails() {
-        Book book = new Book();
-        book.setId(null);
-        assertThatPropertyIsNotValid(book, "id");
-    }
-
-    @Test
     void whenSetBlankTitle_thenValidationFails() {
         Book book = new Book();
         book.setTitle("");

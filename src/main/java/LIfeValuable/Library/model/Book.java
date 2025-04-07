@@ -1,5 +1,6 @@
 package LifeValuable.Library.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.ISBN;
@@ -7,14 +8,23 @@ import org.hibernate.validator.constraints.ISBN;
 import java.time.LocalDate;
 import java.util.List;
 
+@Entity
 @Data
 @NoArgsConstructor
 public class Book {
-    @NotNull private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @NotBlank private String title;
     @NotBlank private String author;
     @ISBN private String isbn;
     private Integer publicationYear;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "book_genre",
+        joinColumns = @JoinColumn(name = "book_id"),
+        inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
     @NotEmpty private List<Genre> genres;
     @Min(0) private Integer stock;
 
