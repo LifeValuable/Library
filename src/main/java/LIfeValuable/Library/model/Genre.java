@@ -1,9 +1,8 @@
 package LifeValuable.Library.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Data

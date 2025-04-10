@@ -19,6 +19,7 @@ public class Book {
     @NotBlank private String author;
     @ISBN private String isbn;
     private Integer publicationYear;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "book_genre",
@@ -27,6 +28,9 @@ public class Book {
     )
     @NotEmpty private List<Genre> genres;
     @Min(0) private Integer stock;
+
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
+    private List<Lending> lendings;
 
     public void setPublicationYear(Integer year) {
         if (year > LocalDate.now().getYear())

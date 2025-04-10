@@ -3,9 +3,7 @@ package LifeValuable.Library.model;
 public enum LendingStatus {
     ACTIVE("Активно"),
     RETURNED("Возвращено"),
-    OVERDUE("Просрочено"),
-    RESERVED("Зарезервировано"),
-    CANCELLED("Отменено");
+    OVERDUE("Просрочено");
 
     private final String displayName;
 
