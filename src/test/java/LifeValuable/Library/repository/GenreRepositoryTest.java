@@ -31,7 +31,7 @@ public class GenreRepositoryTest {
 
     private Genre genre1;
     private Genre genre2;
-    private Genre genre3; // Добавляем третий жанр для тестов findByNameIn
+    private Genre genre3;
 
     @BeforeEach
     public void setUp() {
@@ -48,7 +48,6 @@ public class GenreRepositoryTest {
         genre2.setDescription("Много пушек");
         entityManager.persist(genre2);
 
-        // Добавляем третий жанр
         genre3 = new Genre();
         genre3.setName("Детектив");
         genre3.setDescription("Расследования");
@@ -164,13 +163,10 @@ public class GenreRepositoryTest {
 
     @Test
     public void whenFindByNameIn_withMultipleExistingNames_thenReturnsMatchingGenres() {
-        // Arrange
         List<String> namesToFind = Arrays.asList("Фантастика", "Детектив");
 
-        // Act
         List<Genre> foundGenres = genreRepository.findByNameIn(namesToFind);
 
-        // Assert
         assertThat(foundGenres).isNotNull();
         assertThat(foundGenres).hasSize(2);
         assertThat(foundGenres).extracting(Genre::getName)
@@ -179,13 +175,10 @@ public class GenreRepositoryTest {
 
     @Test
     public void whenFindByNameIn_withSomeExistingAndNonExistingNames_thenReturnsOnlyExistingGenres() {
-        // Arrange
         List<String> namesToFind = Arrays.asList("Боевик", "Несуществующий жанр", "Фантастика");
 
-        // Act
         List<Genre> foundGenres = genreRepository.findByNameIn(namesToFind);
 
-        // Assert
         assertThat(foundGenres).isNotNull();
         assertThat(foundGenres).hasSize(2);
         assertThat(foundGenres).extracting(Genre::getName)
@@ -194,41 +187,32 @@ public class GenreRepositoryTest {
 
     @Test
     public void whenFindByNameIn_withOnlyNonExistingNames_thenReturnsEmptyList() {
-        // Arrange
         List<String> namesToFind = Arrays.asList("Хоррор", "Приключения");
 
-        // Act
         List<Genre> foundGenres = genreRepository.findByNameIn(namesToFind);
 
-        // Assert
         assertThat(foundGenres).isNotNull();
         assertThat(foundGenres).isEmpty();
     }
 
     @Test
     public void whenFindByNameIn_withEmptyList_thenReturnsEmptyList() {
-        // Arrange
         List<String> namesToFind = Collections.emptyList();
 
-        // Act
         List<Genre> foundGenres = genreRepository.findByNameIn(namesToFind);
 
-        // Assert
         assertThat(foundGenres).isNotNull();
         assertThat(foundGenres).isEmpty();
     }
 
     @Test
     public void whenFindByNameIn_withDuplicateNamesInInput_thenReturnsUniqueGenres() {
-        // Arrange
         List<String> namesToFind = Arrays.asList("Боевик", "Фантастика", "Боевик");
 
-        // Act
         List<Genre> foundGenres = genreRepository.findByNameIn(namesToFind);
 
-        // Assert
         assertThat(foundGenres).isNotNull();
-        assertThat(foundGenres).hasSize(2); // Должно быть 2 уникальных жанра
+        assertThat(foundGenres).hasSize(2);
         assertThat(foundGenres).extracting(Genre::getName)
                 .containsExactlyInAnyOrder("Боевик", "Фантастика");
     }

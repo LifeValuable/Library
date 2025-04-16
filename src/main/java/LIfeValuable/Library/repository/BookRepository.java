@@ -3,6 +3,8 @@ package LifeValuable.Library.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,17 +15,17 @@ import LifeValuable.Library.model.Genre;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByTitle(String title);
-    List<Book> findByTitleContaining(String titleFragment);
-    List<Book> findByAuthor(String author);
+    Page<Book> findByTitleContaining(String titleFragment, Pageable pageable);
+    Page<Book> findByAuthor(String author, Pageable pageable);
     Optional<Book> findByIsbn(String isbn);
-    List<Book> findByPublicationYear(Integer year);
+    Page<Book> findByPublicationYear(Integer year, Pageable pageable);
     @Query("SELECT b FROM Book b JOIN b.genres g WHERE g IN :genres GROUP BY b HAVING COUNT(DISTINCT g) = :genresCount")
-    List<Book> findByAllGenres(@Param("genres") List<Genre> genres, @Param("genresCount") Long genresCount);
+    Page<Book> findByAllGenres(@Param("genres") List<Genre> genres, @Param("genresCount") Long genresCount, Pageable pageable);
 
-    List<Book> findByPublicationYearBetween(Integer start, Integer end);
-    List<Book> findByStockGreaterThan(Integer min);
-    List<Book> findByStockLessThan(Integer min);
+    Page<Book> findByPublicationYearBetween(Integer start, Integer end, Pageable pageable);
+    Page<Book> findByStockGreaterThan(Integer min, Pageable pageable);
+    Page<Book> findByStockLessThan(Integer min, Pageable pageable);
 
     @Query("SELECT b FROM Book b JOIN b.genres g WHERE g.name = :name")
-    List<Book> findByGenreName(@Param("name") String genreName);
+    Page<Book> findByGenreName(@Param("name") String genreName, Pageable pageable);
 }

@@ -2,6 +2,7 @@ package LifeValuable.Library.repository;
 
 
 import LifeValuable.Library.config.DataConfig;
+import LifeValuable.Library.dto.book.BookPopularityDTO;
 import LifeValuable.Library.model.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,8 @@ public class LendingRepositoryTest {
     private Lending lending3;
     private Lending lending4;
 
+    private Pageable defaultPageable;
+
     @BeforeEach
     void setUp() {
         entityManager.createQuery("DELETE FROM Lending").executeUpdate();
@@ -57,7 +61,6 @@ public class LendingRepositoryTest {
         genre.setDescription("Классическая литература");
         entityManager.persist(genre);
 
-        // Первая книга
         book = new Book();
         book.setTitle("Мастер и Маргарита");
         book.setAuthor("Михаил Булгаков");
@@ -69,7 +72,6 @@ public class LendingRepositoryTest {
         book.setGenres(genres);
         entityManager.persist(book);
 
-        // Вторая книга
         book2 = new Book();
         book2.setTitle("Война и мир");
         book2.setAuthor("Лев Толстой");
@@ -79,7 +81,6 @@ public class LendingRepositoryTest {
         book2.setGenres(new ArrayList<>(genres));
         entityManager.persist(book2);
 
-        // Третья книга
         book3 = new Book();
         book3.setTitle("Преступление и наказание");
         book3.setAuthor("Федор Достоевский");
@@ -89,7 +90,6 @@ public class LendingRepositoryTest {
         book3.setGenres(new ArrayList<>(genres));
         entityManager.persist(book3);
 
-        // Первый читатель
         reader = new Reader();
         reader.setFirstName("Иван");
         reader.setLastName("Петров");
@@ -98,7 +98,6 @@ public class LendingRepositoryTest {
         reader.setRegistrationDate(LocalDate.now().minusMonths(1));
         entityManager.persist(reader);
 
-        // Второй читатель
         reader2 = new Reader();
         reader2.setFirstName("Мария");
         reader2.setLastName("Сидорова");
@@ -107,7 +106,6 @@ public class LendingRepositoryTest {
         reader2.setRegistrationDate(LocalDate.now().minusMonths(2));
         entityManager.persist(reader2);
 
-        // Активная выдача
         lending = new Lending();
         lending.setBook(book);
         lending.setReader(reader);
@@ -116,7 +114,6 @@ public class LendingRepositoryTest {
         lending.setStatus(LendingStatus.ACTIVE);
         entityManager.persist(lending);
 
-        // Просроченная выдача
         lending2 = new Lending();
         lending2.setBook(book2);
         lending2.setReader(reader);
@@ -125,7 +122,6 @@ public class LendingRepositoryTest {
         lending2.setStatus(LendingStatus.OVERDUE);
         entityManager.persist(lending2);
 
-        // Возвращенная выдача
         lending3 = new Lending();
         lending3.setBook(book);
         lending3.setReader(reader2);
@@ -135,7 +131,6 @@ public class LendingRepositoryTest {
         lending3.setStatus(LendingStatus.RETURNED);
         entityManager.persist(lending3);
 
-        // Активная выдача второго читателя
         lending4 = new Lending();
         lending4.setBook(book3);
         lending4.setReader(reader2);
@@ -145,6 +140,8 @@ public class LendingRepositoryTest {
         entityManager.persist(lending4);
 
         entityManager.flush();
+
+        defaultPageable = PageRequest.of(0, 10);
     }
 
 
@@ -214,12 +211,10 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByStatus_thenReturnLendingsWithThatStatus() {
-        // Act
-        List<Lending> activeLendings = lendingRepository.findByStatus(LendingStatus.ACTIVE);
-        List<Lending> overdueLendings = lendingRepository.findByStatus(LendingStatus.OVERDUE);
-        List<Lending> returnedLendings = lendingRepository.findByStatus(LendingStatus.RETURNED);
+        List<Lending> activeLendings = lendingRepository.findByStatus(LendingStatus.ACTIVE, defaultPageable).getContent();
+        List<Lending> overdueLendings = lendingRepository.findByStatus(LendingStatus.OVERDUE, defaultPageable).getContent();
+        List<Lending> returnedLendings = lendingRepository.findByStatus(LendingStatus.RETURNED, defaultPageable).getContent();
 
-        // Assert
         assertThat(activeLendings).hasSize(2);
         assertThat(overdueLendings).hasSize(1);
         assertThat(returnedLendings).hasSize(1);
@@ -230,12 +225,10 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByStatusAndReturnDateIsNull_thenReturnUnreturnedLendingsWithThatStatus() {
-        // Act
-        List<Lending> activeUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.ACTIVE);
-        List<Lending> overdueUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.OVERDUE);
-        List<Lending> returnedUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.RETURNED);
+        List<Lending> activeUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.ACTIVE, defaultPageable).getContent();
+        List<Lending> overdueUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.OVERDUE, defaultPageable).getContent();
+        List<Lending> returnedUnreturned = lendingRepository.findByStatusAndReturnDateIsNull(LendingStatus.RETURNED, defaultPageable).getContent();
 
-        // Assert
         assertThat(activeUnreturned).hasSize(2);
         assertThat(overdueUnreturned).hasSize(1);
         assertThat(returnedUnreturned).isEmpty();
@@ -248,10 +241,8 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByDueDateBeforeAndReturnDateIsNull_thenReturnOverdueBooks() {
-        // Act
-        List<Lending> overdueBooks = lendingRepository.findByDueDateBeforeAndReturnDateIsNull(LocalDate.now());
+        List<Lending> overdueBooks = lendingRepository.findByDueDateBeforeAndReturnDateIsNull(LocalDate.now(), defaultPageable).getContent();
 
-        // Assert
         assertThat(overdueBooks).hasSize(1);
         assertThat(overdueBooks.get(0).getStatus()).isEqualTo(LendingStatus.OVERDUE);
         assertThat(overdueBooks.get(0).getDueDate()).isBefore(LocalDate.now());
@@ -260,13 +251,11 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByLendingDateBetween_thenReturnLendingsInThatPeriod() {
-        // Act
         LocalDate startDate = LocalDate.now().minusDays(10);
         LocalDate endDate = LocalDate.now();
-        List<Lending> recentLendings = lendingRepository.findByLendingDateBetween(startDate, endDate);
+        List<Lending> recentLendings = lendingRepository.findByLendingDateBetween(startDate, endDate, defaultPageable).getContent();
 
-        // Assert
-        assertThat(recentLendings).hasSize(2); // должны попасть lending и lending4
+        assertThat(recentLendings).hasSize(2);
         for (Lending l : recentLendings) {
             assertThat(l.getLendingDate()).isAfterOrEqualTo(startDate);
             assertThat(l.getLendingDate()).isBeforeOrEqualTo(endDate);
@@ -275,11 +264,9 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByReaderId_thenReturnLendingsForThatReader() {
-        // Act
-        List<Lending> reader1Lendings = lendingRepository.findByReaderId(reader.getId());
-        List<Lending> reader2Lendings = lendingRepository.findByReaderId(reader2.getId());
+        List<Lending> reader1Lendings = lendingRepository.findByReaderId(reader.getId(), defaultPageable).getContent();
+        List<Lending> reader2Lendings = lendingRepository.findByReaderId(reader2.getId(), defaultPageable).getContent();
 
-        // Assert
         assertThat(reader1Lendings).hasSize(2);
         assertThat(reader2Lendings).hasSize(2);
 
@@ -290,11 +277,9 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByReaderIdAndStatus_thenReturnLendingsForThatReaderWithThatStatus() {
-        // Act
-        List<Lending> reader1ActiveLendings = lendingRepository.findByReaderIdAndStatus(reader.getId(), LendingStatus.ACTIVE);
-        List<Lending> reader1OverdueLendings = lendingRepository.findByReaderIdAndStatus(reader.getId(), LendingStatus.OVERDUE);
+        List<Lending> reader1ActiveLendings = lendingRepository.findByReaderIdAndStatus(reader.getId(), LendingStatus.ACTIVE, defaultPageable).getContent();
+        List<Lending> reader1OverdueLendings = lendingRepository.findByReaderIdAndStatus(reader.getId(), LendingStatus.OVERDUE, defaultPageable).getContent();
 
-        // Assert
         assertThat(reader1ActiveLendings).hasSize(1);
         assertThat(reader1OverdueLendings).hasSize(1);
 
@@ -304,11 +289,9 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindByBookId_thenReturnLendingsForThatBook() {
-        // Act
-        List<Lending> book1Lendings = lendingRepository.findByBookId(book.getId());
+        List<Lending> book1Lendings = lendingRepository.findByBookId(book.getId(), defaultPageable).getContent();
 
-        // Assert
-        assertThat(book1Lendings).hasSize(2); // lending и lending3
+        assertThat(book1Lendings).hasSize(2);
 
         for (Lending l : book1Lendings) {
             assertThat(l.getBook().getId()).isEqualTo(book.getId());
@@ -317,20 +300,14 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindTopBorrowedBooks_thenReturnPopularBooks() {
-        // Act
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        List<Object[]> topBooks = lendingRepository.findTopBorrowedBooks(pageRequest);
+        List<BookPopularityDTO> topBooks = lendingRepository.findTopBorrowedBooks(defaultPageable).getContent();
 
-        // Assert
         assertThat(topBooks).isNotEmpty();
 
-        // Первая книга в результате должна иметь больше всего выдач (в нашем случае это book с 2 выдачами)
-        Object[] firstResult = topBooks.get(0);
-        Book mostBorrowedBook = (Book) firstResult[0];
-        Long borrowCount = (Long) firstResult[1];
+        BookPopularityDTO firstResult = topBooks.get(0);
 
-        assertThat(mostBorrowedBook.getId()).isEqualTo(book.getId());
-        assertThat(borrowCount).isEqualTo(2L);
+        assertThat(firstResult.id()).isEqualTo(book.getId());
+        assertThat(firstResult.lendingCount()).isEqualTo(2L);
     }
 
 }

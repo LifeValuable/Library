@@ -2,7 +2,6 @@ package LifeValuable.Library.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +9,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,8 @@ public class BookRepositoryTest {
 
     private Genre fantasy;
     private Genre sciFi;
+
+    private Pageable defaultPageable;
 
     @BeforeEach
     void setUp() {
@@ -75,6 +78,8 @@ public class BookRepositoryTest {
         entityManager.persist(book1);
         entityManager.persist(book2);
         entityManager.flush();
+
+        defaultPageable = PageRequest.of(0, 10);
     }
 
 
@@ -163,7 +168,7 @@ public class BookRepositoryTest {
 
     @Test
     public void whenFindBooksByTitleContaining_thenBooksAreFound() {
-        List<Book> books = bookRepository.findByTitleContaining("Гарри");
+        List<Book> books = bookRepository.findByTitleContaining("Гарри", defaultPageable).getContent();
 
         assertThat(books).hasSize(1);
         assertThat(books.get(0).getTitle()).contains("Гарри");
@@ -171,7 +176,7 @@ public class BookRepositoryTest {
 
     @Test
     public void whenFindBooksByAuthor_thenBooksAreFound() {
-        List<Book> books = bookRepository.findByAuthor("Джоан Роулинг");
+        List<Book> books = bookRepository.findByAuthor("Джоан Роулинг", defaultPageable).getContent();
 
         assertThat(books).hasSize(1);
         assertThat(books.get(0).getTitle()).isEqualTo("Гарри Поттер и философский камень");
@@ -194,7 +199,7 @@ public class BookRepositoryTest {
 
     @Test
     public void whenFindBooksByPublicationYear_thenBooksAreFound() {
-        List<Book> books = bookRepository.findByPublicationYear(1997);
+        List<Book> books = bookRepository.findByPublicationYear(1997, defaultPageable).getContent();
 
         assertThat(books).hasSize(1);
         assertThat(books.get(0).getTitle()).isEqualTo("Гарри Поттер и философский камень");
@@ -259,7 +264,7 @@ public class BookRepositoryTest {
         List<Genre> searchGenres = new ArrayList<>();
         searchGenres.add(fantasy);
         searchGenres.add(sciFi);
-        List<Book> result = bookRepository.findByAllGenres(searchGenres, (long) searchGenres.size());
+        List<Book> result = bookRepository.findByAllGenres(searchGenres, (long) searchGenres.size(), defaultPageable).getContent();
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getTitle()).isEqualTo("Звездная пыль");
@@ -279,7 +284,7 @@ public class BookRepositoryTest {
         entityManager.persist(book3);
         entityManager.flush();
 
-        List<Book> books = bookRepository.findByPublicationYearBetween(1990, 2010);
+        List<Book> books = bookRepository.findByPublicationYearBetween(1990, 2010, defaultPageable).getContent();
 
         assertThat(books).hasSize(2);
         assertThat(books).extracting(Book::getPublicationYear)
@@ -291,7 +296,7 @@ public class BookRepositoryTest {
     @Test
     public void whenFindByStockGreaterThan_thenBooksAreFound() {
 
-        List<Book> books = bookRepository.findByStockGreaterThan(7);
+        List<Book> books = bookRepository.findByStockGreaterThan(7, defaultPageable).getContent();
 
         assertThat(books).hasSize(1);
         assertThat(books.get(0).getTitle()).isEqualTo("Гарри Поттер и философский камень");
@@ -301,7 +306,7 @@ public class BookRepositoryTest {
     @Test
     public void whenFindByStockLessThan_thenBooksAreFound() {
 
-        List<Book> books = bookRepository.findByStockLessThan(7);
+        List<Book> books = bookRepository.findByStockLessThan(7, defaultPageable).getContent();
 
         assertThat(books).hasSize(1);
         assertThat(books.get(0).getTitle()).isEqualTo("Дюна");
@@ -311,8 +316,8 @@ public class BookRepositoryTest {
     @Test
     public void whenFindByGenreName_thenBooksAreFound() {
 
-        List<Book> fantasyBooks = bookRepository.findByGenreName("Фэнтези");
-        List<Book> sciFiBooks = bookRepository.findByGenreName("Научная фантастика");
+        List<Book> fantasyBooks = bookRepository.findByGenreName("Фэнтези", defaultPageable).getContent();
+        List<Book> sciFiBooks = bookRepository.findByGenreName("Научная фантастика", defaultPageable).getContent();
 
         assertThat(fantasyBooks).hasSize(1);
         assertThat(fantasyBooks.get(0).getTitle()).isEqualTo("Гарри Поттер и философский камень");
