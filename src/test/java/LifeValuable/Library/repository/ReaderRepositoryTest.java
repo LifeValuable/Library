@@ -6,6 +6,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -137,9 +139,50 @@ public class ReaderRepositoryTest {
         assertThat(readerRepository.findAll()).isEmpty();
     }
     
-    @Test void whenCountReaders_thenCorrectNumberReturned() {
+    @Test
+    void whenCountReaders_thenCorrectNumberReturned() {
         long count = readerRepository.count();
 
         assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    void whenFindFindReaderByPhoneNumber_thenReaderIsFound() {
+        String number = "+79876543210";
+        Optional<Reader> reader = readerRepository.findByPhoneNumber(number);
+
+        assertThat(reader)
+                .isPresent();
+        assertThat(reader.get().getPhoneNumber())
+                .isEqualTo(number);
+    }
+
+    @ValueSource(strings = {"", "+79876543211", "79876543210", "89876543210"})
+    @ParameterizedTest
+    void whenFindFindReaderByPhoneNumber_thenReaderIsNotFound(String number) {
+        Optional<Reader> reader = readerRepository.findByPhoneNumber(number);
+
+        assertThat(reader)
+                .isEmpty();
+    }
+
+    @Test
+    void whenFindFindReaderByEmail_thenReaderIsFound() {
+        String email = "white@vasya.ru";
+        Optional<Reader> reader = readerRepository.findByEmail(email);
+
+        assertThat(reader)
+                .isPresent();
+        assertThat(reader.get().getEmail())
+                .isEqualTo(email);
+    }
+
+    @ValueSource(strings = {"", " white@vasya.ru ", "white@vasya_ru"})
+    @ParameterizedTest
+    void whenFindFindReaderByEmail_thenReaderIsNotFound(String email) {
+        Optional<Reader> reader = readerRepository.findByEmail(email);
+
+        assertThat(reader)
+                .isEmpty();
     }
 }
