@@ -211,7 +211,9 @@ class LendingMapperTest {
 
         assertThat(actualEntity).isNotNull();
         assertThat(actualEntity)
-                .isEqualToIgnoringGivenFields(expectedLending, "id", "book", "reader", "status", "returnDate");
+                .usingRecursiveComparison()
+                .ignoringFields("id", "book", "reader", "status", "returnDate")
+                .isEqualTo(expectedLending);
         assertThat(actualEntity.getId()).isNull();
         assertThat(actualEntity.getBook()).isNull();
         assertThat(actualEntity.getReader()).isNull();

@@ -264,7 +264,7 @@ public class BookRepositoryTest {
         List<Genre> searchGenres = new ArrayList<>();
         searchGenres.add(fantasy);
         searchGenres.add(sciFi);
-        List<Book> result = bookRepository.findByAllGenres(searchGenres, (long) searchGenres.size(), defaultPageable).getContent();
+        List<Book> result = bookRepository.findByAllGenres(searchGenres, defaultPageable).getContent();
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getTitle()).isEqualTo("Звездная пыль");

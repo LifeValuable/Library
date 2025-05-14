@@ -202,7 +202,9 @@ class ReaderMapperTest {
 
         assertThat(actualReader).isNotNull();
         assertThat(actualReader)
-                .isEqualToIgnoringGivenFields(expectedReader, "id", "lendings", "registrationDate");
+                .usingRecursiveComparison()
+                .ignoringFields("id", "lendings", "registrationDate")
+                .isEqualTo(expectedReader);
         assertThat(actualReader.getId()).isNull();
         assertThat(actualReader.getLendings()).isNull();
         assertThat(actualReader.getRegistrationDate()).isEqualTo(today);

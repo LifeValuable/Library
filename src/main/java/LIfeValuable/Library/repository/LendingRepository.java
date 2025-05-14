@@ -1,6 +1,6 @@
 package LifeValuable.Library.repository;
 
-import LifeValuable.Library.model.Book;
+import LifeValuable.Library.dto.book.BookPopularityDTO;
 import LifeValuable.Library.model.Lending;
 import LifeValuable.Library.model.LendingStatus;
 import org.springframework.data.domain.Page;
@@ -18,6 +18,7 @@ public interface LendingRepository extends JpaRepository<Lending, Long> {
     Page<Lending> findByReaderId(Long readerId, Pageable pageable);
     Page<Lending> findByReaderIdAndStatus(Long readerId, LendingStatus status, Pageable pageable);
     Page<Lending> findByBookId(Long bookId, Pageable pageable);
-    @Query("SELECT b FROM Book b JOIN b.lendings l GROUP BY b ORDER BY COUNT(l) DESC")
-    Page<Book> findTopBorrowedBooksAsEntities(Pageable pageable);
+    @Query("SELECT new LifeValuable.Library.dto.book.BookPopularityDTO(b.id, b.title, b.author, CAST(COUNT(l) AS Integer)) " +
+            "FROM Book b JOIN b.lendings l GROUP BY b.id, b.title, b.author ORDER BY COUNT(l) DESC")
+    Page<BookPopularityDTO> findTopBorrowedBooks(Pageable pageable);
 }
