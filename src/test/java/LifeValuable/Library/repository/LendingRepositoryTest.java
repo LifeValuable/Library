@@ -300,14 +300,14 @@ public class LendingRepositoryTest {
 
     @Test
     public void whenFindTopBorrowedBooks_thenReturnPopularBooks() {
-        List<BookPopularityDTO> topBooks = lendingRepository.findTopBorrowedBooks(defaultPageable).getContent();
+        List<BookLendingProjection> topBooks = lendingRepository.findTopBorrowedBooks(defaultPageable).getContent();
 
         assertThat(topBooks).isNotEmpty();
 
-        BookPopularityDTO firstResult = topBooks.get(0);
+        BookLendingProjection firstResult = topBooks.get(0);
 
-        assertThat(firstResult.id()).isEqualTo(book.getId());
-        assertThat(firstResult.lendingCount()).isEqualTo(2L);
+        assertThat(firstResult.getId()).isEqualTo(book.getId());
+        assertThat(firstResult.getLendingCount()).isEqualTo(2L);
     }
 
 }

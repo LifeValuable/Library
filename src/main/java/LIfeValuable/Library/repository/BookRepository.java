@@ -12,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import LifeValuable.Library.model.Book;
 import LifeValuable.Library.model.Genre;
 
-
 public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByTitle(String title);
     Page<Book> findByTitleContaining(String titleFragment, Pageable pageable);

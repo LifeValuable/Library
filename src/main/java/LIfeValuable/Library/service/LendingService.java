@@ -15,7 +15,7 @@ public interface LendingService {
     LendingDetailDTO create(CreateLendingDTO createLendingDTO);
     LendingDetailDTO returnBook(Long lendingId);
     LendingDetailDTO findById(Long lendingId);
-    Page<LendingDTO> findByStatus(LendingStatus status);
+    Page<LendingDTO> findByStatus(LendingStatus status, Pageable pageable);
 
     Page<LendingDTO> findByDueDateBeforeAndReturnDateIsNull(LocalDate date, Pageable pageable);
     Page<LendingDTO> findByLendingDateBetween(LocalDate start, LocalDate end, Pageable pageable);
@@ -29,9 +29,7 @@ public interface LendingService {
 
     Page<LendingDTO> findAllLendings(Pageable pageable); 
     
-    void cancelLending(Long lendingId); 
-    LendingDetailDTO updateLendingStatus(Long lendingId, LendingStatus newStatus); 
+    LendingDetailDTO updateLendingStatus(Long lendingId, LendingStatus newStatus);
 
-    boolean isBookAvailableForLending(Long bookId); 
-    List<LendingDTO> getOverdueLendingsForReader(Long readerId); 
+    Page<LendingDTO> getOverdueLendingsForReader(Long readerId, Pageable pageable);
 }
