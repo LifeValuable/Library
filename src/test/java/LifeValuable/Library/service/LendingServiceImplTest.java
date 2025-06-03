@@ -372,7 +372,7 @@ class LendingServiceImplTest {
         lendingService.updateStatuses();
 
         assertThat(overdueLending.getStatus()).isEqualTo(LendingStatus.OVERDUE);
-        assertThat(lending.getStatus()).isEqualTo(LendingStatus.ACTIVE); // не должен измениться
+        assertThat(lending.getStatus()).isEqualTo(LendingStatus.ACTIVE);
         verify(lendingRepository).findAll();
     }
 

@@ -29,10 +29,10 @@ public interface BookService {
     BookDetailDTO addGenreToBook(Long bookId, String genreName);
     BookDetailDTO removeGenreFromBook(Long bookId, String genreName);
 
+    BookDetailDTO updateBookStock(Long id, Integer newStock);
     Page<BookDTO> findByStockAvailable(Pageable pageable);
     Page<BookDTO> findByStockGreaterThan(Integer minStock, Pageable pageable);
     Page<BookDTO> findByStockLessThan(Integer maxStock, Pageable pageable);
-    BookDetailDTO updateBookStock(Long id, Integer newStock);
 
     boolean isAvailableForLending(Long bookId);
     int getAvailableStockCount(Long bookId);

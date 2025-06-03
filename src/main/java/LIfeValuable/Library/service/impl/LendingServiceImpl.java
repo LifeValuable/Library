@@ -18,11 +18,13 @@ import LifeValuable.Library.service.ReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class LendingServiceImpl implements LendingService {
     private final LendingMapper lendingMapper;
     private final LendingRepository lendingRepository;
@@ -37,6 +39,7 @@ public class LendingServiceImpl implements LendingService {
         this.readerService = readerService;
     }
 
+    @Transactional
     @Override
     public LendingDetailDTO create(CreateLendingDTO createLendingDTO) {
         readerService.findById(createLendingDTO.readerId());
@@ -119,7 +122,7 @@ public class LendingServiceImpl implements LendingService {
         );
     }
 
-
+    @Transactional
     @Override
     public LendingDetailDTO extendLending(Long lendingId, LocalDate newDueDate) {
         Lending lending = lendingRepository.findById(lendingId).orElseThrow(() -> new LendingNotFoundException(lendingId));
@@ -130,6 +133,7 @@ public class LendingServiceImpl implements LendingService {
         return lendingMapper.toDetailDto(lending);
     }
 
+    @Transactional
     @Override
     public void updateStatuses() {
         List<Lending> lendings = lendingRepository.findAll();
@@ -147,7 +151,7 @@ public class LendingServiceImpl implements LendingService {
         return lendings.map(lendingMapper::toDto);
     }
 
-
+    @Transactional
     @Override
     public LendingDetailDTO updateLendingStatus(Long lendingId, LendingStatus newStatus) {
         Lending lending = lendingRepository.findById(lendingId).orElseThrow(() -> new LendingNotFoundException(lendingId));

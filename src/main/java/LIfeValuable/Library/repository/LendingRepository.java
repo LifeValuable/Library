@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 
+@Repository
 public interface LendingRepository extends JpaRepository<Lending, Long> {
     Page<Lending> findByStatus(LendingStatus status, Pageable pageable);
     Page<Lending> findByStatusAndReturnDateIsNull(LendingStatus status, Pageable pageable);

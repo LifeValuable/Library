@@ -15,6 +15,7 @@ import LifeValuable.Library.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -23,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+@Service
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
@@ -203,6 +204,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findByStockLessThan(maxStock, pageable).map(bookMapper::toDto);
     }
 
+    @Transactional
     @Override
     public BookDetailDTO updateBookStock(Long bookId, Integer newStock) {
         Book bookToUpdate = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));

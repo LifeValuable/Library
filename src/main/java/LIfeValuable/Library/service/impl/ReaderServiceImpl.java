@@ -11,10 +11,12 @@ import LifeValuable.Library.service.ReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
+@Service
 public class ReaderServiceImpl implements ReaderService {
     private ReaderRepository readerRepository;
     private ReaderMapper readerMapper;

@@ -7,7 +7,7 @@
     </appender>
 
     <!-- Установка уровня логирования -->
-    <root level="DEBUG">
+    <root level="TRACE">
         <appender-ref ref="CONSOLE" />
     </root>
 
