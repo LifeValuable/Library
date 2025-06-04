@@ -4,6 +4,11 @@ import LifeValuable.Library.exception.ReaderNotFoundException;
 import LifeValuable.Library.service.ReaderService;
 import LifeValuable.Library.dto.reader.*;
 import LifeValuable.Library.dto.exception.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -16,11 +21,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
 
+@Tag(name = "Читатели", description = "Управление читателями библиотеки")
+@Validated
 @RestController
 @RequestMapping("/api/readers")
 public class ReaderController {
@@ -31,47 +39,106 @@ public class ReaderController {
         this.readerService = readerService;
     }
 
+    @Operation(summary = "Получить всех читателей", description = "Возвращает пагинированный список всех читателей, отсортированный по имени")
+    @ApiResponse(responseCode = "200", description = "Список читателей успешно получен")
     @GetMapping
-    public ResponseEntity<Page<ReaderDTO>> getAllReaders (
-            @PageableDefault(sort = "fullName", direction = Sort.Direction.ASC)
-            Pageable pageable) {
+    public ResponseEntity<Page<ReaderDTO>> getAllReaders(
+            @Parameter(description = "Параметры пагинации и сортировки")
+            @PageableDefault(sort = "firstName", direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(readerService.findAll(pageable));
     }
 
+    @Operation(summary = "Получить читателя по ID", description = "Возвращает подробную информацию о читателе по его идентификатору")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Читатель найден"),
+            @ApiResponse(responseCode = "404", description = "Читатель не найден")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<ReaderDetailDTO> findById (@PathVariable Long id) {
+    public ResponseEntity<ReaderDetailDTO> findById(
+            @Parameter(description = "Уникальный идентификатор читателя", example = "1")
+            @PathVariable Long id) {
         return ResponseEntity.ok(readerService.findById(id));
     }
 
+    @Operation(summary = "Зарегистрировать нового читателя", description = "Создает новую учетную запись читателя в библиотеке")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Читатель успешно зарегистрирован"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные читателя"),
+            @ApiResponse(responseCode = "409", description = "Читатель с таким email или телефоном уже существует")
+    })
     @PostMapping
-    public ResponseEntity<ReaderDetailDTO> create (@Valid @RequestBody CreateReaderDTO createReaderDTO) {
+    public ResponseEntity<ReaderDetailDTO> create(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Данные нового читателя", required = true)
+            @Valid @RequestBody CreateReaderDTO createReaderDTO) {
         ReaderDetailDTO createdReader = readerService.create(createReaderDTO);
         URI location = URI.create("/api/readers/" + createdReader.id());
         return ResponseEntity.created(location).body(createdReader);
     }
 
+    @Operation(summary = "Обновить данные читателя", description = "Обновляет информацию о читателе по его идентификатору")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Данные читателя успешно обновлены"),
+            @ApiResponse(responseCode = "404", description = "Читатель не найден"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "409", description = "Конфликт данных (email или телефон уже используются)")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<ReaderDetailDTO> update (@Valid @RequestBody CreateReaderDTO createReaderDTO, @PathVariable Long id) {
+    public ResponseEntity<ReaderDetailDTO> update(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Обновленные данные читателя", required = true)
+            @Valid @RequestBody CreateReaderDTO createReaderDTO,
+            @Parameter(description = "Идентификатор читателя") @PathVariable Long id) {
         return ResponseEntity.ok(readerService.update(createReaderDTO, id));
     }
 
+    @Operation(summary = "Удалить читателя", description = "Удаляет читателя из библиотеки по его идентификатору")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Читатель успешно удален"),
+            @ApiResponse(responseCode = "404", description = "Читатель не найден"),
+            @ApiResponse(responseCode = "409", description = "Невозможно удалить читателя с активными выдачами")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById (@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "Идентификатор читателя для удаления")
+            @PathVariable Long id) {
         readerService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Поиск читателя по номеру телефона", description = "Находит читателя по его номеру телефона в международном формате")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Читатель найден"),
+            @ApiResponse(responseCode = "404", description = "Читатель с таким номером не найден"),
+            @ApiResponse(responseCode = "400", description = "Некорректный формат номера телефона")
+    })
     @GetMapping("/by-phone")
-    public ResponseEntity<ReaderDetailDTO> findByPhoneNumber (@RequestParam("phone")
-                                                             @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$")
-                                                             String number) {
+    public ResponseEntity<ReaderDetailDTO> findByPhoneNumber(
+            @Parameter(
+                    description = "Номер телефона в международном формате (начинается с +, содержит 8-15 цифр)",
+                    example = "%2B79991234567"
+            )
+            @RequestParam("phone")
+            @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$")
+            String number) {
         return ResponseEntity.ok(readerService.findByPhoneNumber(number));
     }
 
+    @Operation(summary = "Поиск читателя по email", description = "Находит читателя по его адресу электронной почты")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Читатель найден"),
+            @ApiResponse(responseCode = "404", description = "Читатель с таким email не найден"),
+            @ApiResponse(responseCode = "400", description = "Некорректный формат email")
+    })
     @GetMapping("/by-email")
-    public ResponseEntity<ReaderDetailDTO> findByEmail (@RequestParam("email")
-                                                             @NotBlank @Email
-                                                             String email) {
+    public ResponseEntity<ReaderDetailDTO> findByEmail(
+            @Parameter(
+                    description = "Адрес электронной почты читателя",
+                    example = "reader@example.com"
+            )
+            @RequestParam("email")
+            @NotBlank @Email
+            String email) {
         return ResponseEntity.ok(readerService.findByEmail(email));
     }
 }
