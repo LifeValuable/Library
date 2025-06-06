@@ -20,14 +20,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDate;
 
 @Tag(name = "Выдачи книг", description = "Управление выдачами и возвратами книг")
-@Validated
 @RestController
 @RequestMapping("/api/lendings")
 public class LendingController {

@@ -3,13 +3,11 @@ package LifeValuable.Library.controller;
 import LifeValuable.Library.exception.ReaderNotFoundException;
 import LifeValuable.Library.service.ReaderService;
 import LifeValuable.Library.dto.reader.*;
-import LifeValuable.Library.dto.exception.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,16 +17,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 
 @Tag(name = "Читатели", description = "Управление читателями библиотеки")
-@Validated
 @RestController
 @RequestMapping("/api/readers")
 public class ReaderController {
@@ -92,6 +86,7 @@ public class ReaderController {
         return ResponseEntity.ok(readerService.update(createReaderDTO, id));
     }
 
+
     @Operation(summary = "Удалить читателя", description = "Удаляет читателя из библиотеки по его идентификатору")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Читатель успешно удален"),
@@ -114,12 +109,13 @@ public class ReaderController {
     })
     @GetMapping("/by-phone")
     public ResponseEntity<ReaderDetailDTO> findByPhoneNumber(
+            @RequestParam("phone")
+            @NotBlank(message = "Phone number is required")
+            @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$", message = "Invalid phone number format")
             @Parameter(
                     description = "Номер телефона в международном формате (начинается с +, содержит 8-15 цифр)",
                     example = "%2B79991234567"
             )
-            @RequestParam("phone")
-            @Pattern(regexp = "^\\+[1-9][0-9]{7,14}$")
             String number) {
         return ResponseEntity.ok(readerService.findByPhoneNumber(number));
     }
@@ -132,12 +128,13 @@ public class ReaderController {
     })
     @GetMapping("/by-email")
     public ResponseEntity<ReaderDetailDTO> findByEmail(
+            @RequestParam("email")
+            @NotBlank(message = "Email is required")
+            @Email(message = "Invalid email format")
             @Parameter(
                     description = "Адрес электронной почты читателя",
                     example = "reader@example.com"
             )
-            @RequestParam("email")
-            @NotBlank @Email
             String email) {
         return ResponseEntity.ok(readerService.findByEmail(email));
     }
