@@ -69,23 +69,33 @@ public class ReaderServiceImpl implements ReaderService {
         readerRepository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public ReaderDetailDTO findById(Long id) {
         Reader reader = readerRepository.findById(id).orElseThrow(() -> new ReaderNotFoundException(id));
         return readerMapper.toDetailDto(reader);
     }
 
+    @Transactional
+    @Override
+    public Reader findModelById(Long id) {
+        return readerRepository.findById(id).orElseThrow(() -> new ReaderNotFoundException(id));
+    }
+
+    @Transactional
     @Override
     public Page<ReaderDTO> findAll(Pageable pageable) {
         return readerRepository.findAll(pageable).map(readerMapper::toDto);
     }
 
+    @Transactional
     @Override
     public ReaderDetailDTO findByPhoneNumber(String number) {
         Reader reader = readerRepository.findByPhoneNumber(number).orElseThrow(() -> new ReaderNotFoundException("phoneNumber", number));
         return readerMapper.toDetailDto(reader);
     }
 
+    @Transactional
     @Override
     public ReaderDetailDTO findByEmail(String email) {
         Reader reader = readerRepository.findByEmail(email).orElseThrow(() -> new ReaderNotFoundException("email", email));

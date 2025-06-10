@@ -20,7 +20,7 @@ public class Book {
     @ISBN private String isbn;
     private Integer publicationYear;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "book_genre",
         joinColumns = @JoinColumn(name = "book_id"),

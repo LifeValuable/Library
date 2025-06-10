@@ -13,6 +13,7 @@ import org.mapstruct.Named;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
@@ -38,7 +39,7 @@ public interface BookMapper {
             return Collections.emptyList();
         return book.getGenres().stream()
                 .map(Genre::getName)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Named("getAvailableStock")

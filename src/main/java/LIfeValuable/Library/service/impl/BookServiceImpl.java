@@ -3,6 +3,7 @@ package LifeValuable.Library.service.impl;
 import LifeValuable.Library.dto.book.BookDTO;
 import LifeValuable.Library.dto.book.BookDetailDTO;
 import LifeValuable.Library.dto.book.CreateBookDTO;
+import LifeValuable.Library.dto.cache.CacheablePage;
 import LifeValuable.Library.exception.BookNotFoundException;
 import LifeValuable.Library.exception.GenreNotFoundException;
 import LifeValuable.Library.mapper.BookMapper;
@@ -13,6 +14,10 @@ import LifeValuable.Library.repository.GenreRepository;
 import LifeValuable.Library.service.BookService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@CacheConfig(cacheNames = "books")
 @Service
 public class BookServiceImpl implements BookService {
 
@@ -38,6 +44,7 @@ public class BookServiceImpl implements BookService {
         this.genreRepository = genreRepository;
     }
 
+    @CachePut(key = "#result.id")
     @Override
     public BookDetailDTO create(CreateBookDTO createBookDTO) {
         if (bookRepository.findByIsbn(createBookDTO.isbn()).isPresent())
@@ -63,6 +70,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toDetailDto(savedBook);
     }
 
+    @CachePut(key = "#result.id")
     @Transactional
     @Override
     public BookDetailDTO update(CreateBookDTO createBookDTO, Long id) {
@@ -92,6 +100,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toDetailDto(bookToUpdate);
     }
 
+    @CacheEvict
     @Override
     public void deleteById(Long id) {
         if (!bookRepository.existsById(id))
@@ -100,21 +109,52 @@ public class BookServiceImpl implements BookService {
         bookRepository.deleteById(id);
     }
 
+    @Cacheable
+    @Transactional
     @Override
     public BookDetailDTO findById(Long id) {
         Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
-
         return bookMapper.toDetailDto(book);
+    }
+
+    @Override
+    public Book findModelById(Long id) {
+        return bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
+    }
+
+    @Cacheable
+    @Transactional
+    @Override
+    public Optional<BookDetailDTO> findByTitle(String title) {
+        return bookRepository.findByTitle(title).map(bookMapper::toDetailDto);
+    }
+
+    @Cacheable
+    @Transactional
+    @Override
+    public Optional<BookDetailDTO> findByIsbn(String isbn) {
+        return bookRepository.findByIsbn(isbn).map(bookMapper::toDetailDto);
+    }
+
+    @Cacheable
+    @Override
+    public boolean isAvailableForLending(Long bookId) {
+        return getAvailableStockCount(bookId) > 0;
+    }
+
+    @Cacheable
+    @Override
+    public int getAvailableStockCount(Long bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        long activeLendingsCount = book.getLendings().stream()
+                .filter(lending -> lending.getStatus().isActive())
+                .count();
+        return (int)(book.getStock() - activeLendingsCount);
     }
 
     @Override
     public Page<BookDTO> findAll(Pageable pageable) {
         return bookRepository.findAll(pageable).map(bookMapper::toDto);
-    }
-
-    @Override
-    public Optional<BookDetailDTO> findByTitle(String title) {
-        return bookRepository.findByTitle(title).map(bookMapper::toDetailDto);
     }
 
     @Override
@@ -128,20 +168,15 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Optional<BookDetailDTO> findByIsbn(String isbn) {
-        return bookRepository.findByIsbn(isbn).map(bookMapper::toDetailDto);
-    }
-
-    @Override
     public Page<BookDTO> findByPublicationYear(Integer year, Pageable pageable) {
         return bookRepository.findByPublicationYear(year, pageable).map(bookMapper::toDto);
     }
-
 
     @Override
     public Page<BookDTO> findByPublicationYearBetween(Integer startYear, Integer endYear, Pageable pageable) {
         if (startYear > endYear)
             throw new RuntimeException("Start year must be less than or equal to end year");
+
         return bookRepository.findByPublicationYearBetween(startYear, endYear, pageable).map(bookMapper::toDto);
     }
 
@@ -154,39 +189,9 @@ public class BookServiceImpl implements BookService {
     public Page<BookDTO> findByAllGenres(List<String> genreNames, Pageable pageable) {
         if (genreNames.isEmpty())
             throw new RuntimeException("Genre names list cannot be empty");
+
         List<Genre> genres = genreRepository.findByNameIn(genreNames);
         return bookRepository.findByAllGenres(genres, pageable).map(bookMapper::toDto);
-    }
-
-    @Transactional
-    @Override
-    public BookDetailDTO addGenreToBook(Long bookId, String genreName) {
-        Book bookToUpdate = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        List<Genre> genres = bookToUpdate.getGenres();
-        if (genres.stream().noneMatch(genre -> genre.getName().equals(genreName))) {
-            Genre genreToAdd = genreRepository.findByName(genreName).orElseThrow(() -> new GenreNotFoundException(genreName));
-            genres.add(genreToAdd);
-            bookToUpdate.setGenres(genres);
-        }
-
-        return bookMapper.toDetailDto(bookToUpdate);
-    }
-
-    @Transactional
-    @Override
-    public BookDetailDTO removeGenreFromBook(Long bookId, String genreName) {
-        Book bookToUpdate = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-
-        List<Genre> genres = bookToUpdate.getGenres();
-        List<Genre> newGenres = genres.stream().filter(genre -> !genre.getName().equals(genreName)).toList();
-        if (genres.size() == newGenres.size())
-            throw new RuntimeException(String.format("Book does not have genre: %s", genreName));
-        else if (newGenres.isEmpty())
-            throw new RuntimeException("Can't remove the last genre from a book");
-
-        bookToUpdate.setGenres(newGenres);
-
-        return bookMapper.toDetailDto(bookToUpdate);
     }
 
     @Override
@@ -203,7 +208,41 @@ public class BookServiceImpl implements BookService {
     public Page<BookDTO> findByStockLessThan(Integer maxStock, Pageable pageable) {
         return bookRepository.findByStockLessThan(maxStock, pageable).map(bookMapper::toDto);
     }
+    
+    @CachePut(key = "#result.id")
+    @Transactional
+    @Override
+    public BookDetailDTO addGenreToBook(Long bookId, String genreName) {
+        Book bookToUpdate = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        List<Genre> genres = bookToUpdate.getGenres();
+        if (genres.stream().noneMatch(genre -> genre.getName().equals(genreName))) {
+            Genre genreToAdd = genreRepository.findByName(genreName).orElseThrow(() -> new GenreNotFoundException(genreName));
+            genres.add(genreToAdd);
+            bookToUpdate.setGenres(genres);
+        }
 
+        return bookMapper.toDetailDto(bookToUpdate);
+    }
+
+    @CachePut(key = "#result.id")
+    @Transactional
+    @Override
+    public BookDetailDTO removeGenreFromBook(Long bookId, String genreName) {
+        Book bookToUpdate = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+
+        List<Genre> genres = bookToUpdate.getGenres();
+        List<Genre> newGenres = genres.stream().filter(genre -> !genre.getName().equals(genreName)).collect(Collectors.toList());
+        if (genres.size() == newGenres.size())
+            throw new RuntimeException(String.format("Book does not have genre: %s", genreName));
+        else if (newGenres.isEmpty())
+            throw new RuntimeException("Can't remove the last genre from a book");
+
+        bookToUpdate.setGenres(newGenres);
+
+        return bookMapper.toDetailDto(bookToUpdate);
+    }
+
+    @CachePut(key = "#result.id")
     @Transactional
     @Override
     public BookDetailDTO updateBookStock(Long bookId, Integer newStock) {
@@ -216,20 +255,4 @@ public class BookServiceImpl implements BookService {
 
         return bookMapper.toDetailDto(bookToUpdate);
     }
-
-    @Override
-    public boolean isAvailableForLending(Long bookId) {
-        return getAvailableStockCount(bookId) > 0;
-    }
-
-
-    @Override
-    public int getAvailableStockCount(Long bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        long activeLendingsCount = book.getLendings().stream()
-                .filter(lending -> lending.getStatus().isActive())
-                .count();
-        return (int)(book.getStock() - activeLendingsCount);
-    }
-
 }

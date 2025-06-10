@@ -5,10 +5,8 @@ import LifeValuable.Library.dto.book.BookPopularityDTO;
 import LifeValuable.Library.dto.lending.CreateLendingDTO;
 import LifeValuable.Library.dto.lending.LendingDTO;
 import LifeValuable.Library.dto.lending.LendingDetailDTO;
-import LifeValuable.Library.exception.BookNotFoundException;
 import LifeValuable.Library.exception.LendingNotFoundException;
 import LifeValuable.Library.mapper.LendingMapper;
-import LifeValuable.Library.model.Book;
 import LifeValuable.Library.model.Lending;
 import LifeValuable.Library.model.LendingStatus;
 import LifeValuable.Library.repository.LendingRepository;
@@ -49,6 +47,8 @@ public class LendingServiceImpl implements LendingService {
 
         Lending lending = lendingMapper.toEntity(createLendingDTO);
         lending.setStatus(LendingStatus.ACTIVE);
+        lending.setBook(bookService.findModelById(createLendingDTO.bookId()));
+        lending.setReader(readerService.findModelById(createLendingDTO.readerId()));
 
         Lending savedLending = lendingRepository.save(lending);
         return lendingMapper.toDetailDto(savedLending);

@@ -3,6 +3,7 @@ package LifeValuable.Library.service;
 import LifeValuable.Library.dto.book.BookDTO;
 import LifeValuable.Library.dto.book.BookDetailDTO;
 import LifeValuable.Library.dto.book.CreateBookDTO;
+import LifeValuable.Library.model.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,7 @@ public interface BookService {
     BookDetailDTO update(CreateBookDTO createBookDTO, Long id);
     void deleteById(Long id);
     BookDetailDTO findById(Long id);
+    Book findModelById(Long id);
     Page<BookDTO> findAll(Pageable pageable);
 
     Optional<BookDetailDTO> findByTitle(String title);
