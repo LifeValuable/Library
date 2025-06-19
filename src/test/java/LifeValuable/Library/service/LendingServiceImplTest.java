@@ -110,7 +110,8 @@ class LendingServiceImplTest {
                 LocalDate.now().minusMonths(6),
                 0,
                 0,
-                0
+                0,
+                "READER"
         );
 
         lendingService = new LendingServiceImpl(lendingRepository, bookService, readerService, lendingMapper);

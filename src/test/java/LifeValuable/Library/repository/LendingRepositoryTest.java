@@ -96,6 +96,8 @@ public class LendingRepositoryTest {
         reader.setEmail("ipetrov@example.com");
         reader.setPhoneNumber("+79991234567");
         reader.setRegistrationDate(LocalDate.now().minusMonths(1));
+        reader.setPassword("password");
+        reader.setRole(Role.READER);
         entityManager.persist(reader);
 
         reader2 = new Reader();
@@ -104,6 +106,8 @@ public class LendingRepositoryTest {
         reader2.setEmail("msidorova@example.com");
         reader2.setPhoneNumber("+79997654321");
         reader2.setRegistrationDate(LocalDate.now().minusMonths(2));
+        reader2.setPassword("password");
+        reader2.setRole(Role.READER);
         entityManager.persist(reader2);
 
         lending = new Lending();

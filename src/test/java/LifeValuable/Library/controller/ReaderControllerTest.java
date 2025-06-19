@@ -59,7 +59,8 @@ public class ReaderControllerTest {
                 "Иван",
                 "Петров",
                 "ivan.petrov@email.com",
-                "+71234567890"
+                "+71234567890",
+                "password"
         );
 
         readerDetailDTO = new ReaderDetailDTO(
@@ -71,7 +72,8 @@ public class ReaderControllerTest {
                 LocalDate.now().minusMonths(6),
                 2,
                 0,
-                5
+                5,
+                "READER"
         );
 
         readerDTO = new ReaderDTO(
@@ -156,7 +158,7 @@ public class ReaderControllerTest {
 
     @Test
     void whenCreateReaderWithInvalidData_thenReturnValidationErrors() throws Exception {
-        CreateReaderDTO invalidReader = new CreateReaderDTO("", "", "invalid-email", "invalid-phone");
+        CreateReaderDTO invalidReader = new CreateReaderDTO("", "", "invalid-email", "invalid-phone", "password");
 
         mockMvc.perform(post("/api/readers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +203,7 @@ public class ReaderControllerTest {
 
     @Test
     void whenUpdateReaderWithInvalidData_thenReturnValidationErrors() throws Exception {
-       CreateReaderDTO invalidReader = new CreateReaderDTO("", "", "invalid-email", "invalid-phone");
+       CreateReaderDTO invalidReader = new CreateReaderDTO("", "", "invalid-email", "invalid-phone", "password");
 
         mockMvc.perform(put("/api/readers/1")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -20,10 +20,11 @@ class CreateReaderDTOTest {
     @Test
     void whenAllFieldsValid_thenValidationPasses() {
         CreateReaderDTO dto = new CreateReaderDTO(
-            "Иван",
-            "Иванов",
-            "ivan.ivanov@example.com",
-            "+79991234567"
+                "Иван",
+                "Иванов",
+                "ivan.ivanov@example.com",
+                "+79991234567",
+                "password"
         );
 
         var violations = validator.validate(dto);
@@ -36,7 +37,8 @@ class CreateReaderDTOTest {
             "",
             "Петров",
             "petr.petrov@example.com",
-            "+79991234568"
+            "+79991234568",
+            "password"
         );
 
         var violations = validator.validate(dto);
@@ -49,7 +51,8 @@ class CreateReaderDTOTest {
             "Анна",
             "",
             "anna@example.com",
-            "+79991234569"
+            "+79991234569",
+                "password"
         );
 
         var violations = validator.validate(dto);
@@ -62,7 +65,8 @@ class CreateReaderDTOTest {
             "Сергей",
             "Сидоров",
             "неверный-email",
-            "+79991234570"
+            "+79991234570",
+                "password"
         );
 
         var violations = validator.validate(dto);
@@ -75,7 +79,8 @@ class CreateReaderDTOTest {
             "Мария",
             "Кузнецова",
             "maria@example.com",
-            "неверный-телефон"
+            "неверный-телефон",
+                "password"
         );
 
         var violations = validator.validate(dto);
@@ -88,7 +93,8 @@ class CreateReaderDTOTest {
             "Алексей",
             "Смирнов",
             "alex@example.com",
-            "+123"
+            "+123",
+                "password"
         );
 
         var violations = validator.validate(dto);
@@ -101,10 +107,11 @@ class CreateReaderDTOTest {
             "Екатерина",
             "Николаева",
             "katya@example.com",
-            "+7999123456789012345"
+            "+7999123456789012345",
+                "password"
         );
 
         var violations = validator.validate(dto);
         assertThat(violations).isNotEmpty();
     }
-} 
+}

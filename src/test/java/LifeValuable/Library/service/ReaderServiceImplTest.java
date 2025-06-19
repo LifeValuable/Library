@@ -7,6 +7,7 @@ import LifeValuable.Library.exception.ReaderNotFoundException;
 import LifeValuable.Library.mapper.ReaderMapper;
 import LifeValuable.Library.model.Reader;
 import LifeValuable.Library.repository.ReaderRepository;
+import LifeValuable.Library.security.PasswordConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -35,6 +38,8 @@ class ReaderServiceImplTest {
 
     @Mock
     private ReaderRepository readerRepository;
+
+    private final PasswordEncoder passwordEncoder = new PasswordConfig().passwordEncoder();
 
     private final ReaderMapper readerMapper = Mappers.getMapper(ReaderMapper.class);
 
@@ -60,10 +65,10 @@ class ReaderServiceImplTest {
         expectedReaderDetailDTO = readerMapper.toDetailDto(reader);
 
         createReaderDTO = new CreateReaderDTO(
-                "Сергей", "Иванов", "sergey.i@example.com", "+79112223344"
+                "Сергей", "Иванов", "sergey.i@example.com", "+79112223344", "password"
         );
 
-        readerService = new ReaderServiceImpl(readerRepository, readerMapper);
+        readerService = new ReaderServiceImpl(readerRepository, readerMapper, passwordEncoder);
 
     }
 

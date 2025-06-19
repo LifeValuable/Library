@@ -3,11 +3,7 @@ package LifeValuable.Library.mapper;
 import LifeValuable.Library.dto.reader.CreateReaderDTO;
 import LifeValuable.Library.dto.reader.ReaderDTO;
 import LifeValuable.Library.dto.reader.ReaderDetailDTO;
-import LifeValuable.Library.model.Book;
-import LifeValuable.Library.model.Genre;
-import LifeValuable.Library.model.Lending;
-import LifeValuable.Library.model.LendingStatus;
-import LifeValuable.Library.model.Reader;
+import LifeValuable.Library.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -51,6 +47,8 @@ class ReaderMapperTest {
         testReader.setEmail("anna.k@example.com");
         testReader.setPhoneNumber("+79112223344");
         testReader.setRegistrationDate(today.minusYears(1));
+        testReader.setPassword("password");
+        testReader.setRole(Role.READER);
 
         activeLending1 = new Lending();
         activeLending1.setId(1L);
@@ -117,7 +115,8 @@ class ReaderMapperTest {
                 testReader.getRegistrationDate(),
                 2,
                 1,
-                4 
+                4,
+                "READER"
         );
 
         ReaderDetailDTO actualDto = readerMapper.toDetailDto(testReader);
@@ -154,7 +153,8 @@ class ReaderMapperTest {
                 testReader.getRegistrationDate(),
                 0,
                 0,
-                0 
+                0,
+                "READER"
         );
 
         ReaderDetailDTO actualDto = readerMapper.toDetailDto(testReader);
@@ -186,7 +186,8 @@ class ReaderMapperTest {
                 "Лев",
                 "Толстой",
                 "leo.t@example.com",
-                "+79223334455"
+                "+79223334455",
+                "password"
         );
 
         Reader expectedReader = new Reader();
@@ -197,6 +198,8 @@ class ReaderMapperTest {
         expectedReader.setRegistrationDate(today);
         expectedReader.setId(null);
         expectedReader.setLendings(null);
+        expectedReader.setPassword("password");
+        expectedReader.setRole(Role.READER);
 
         Reader actualReader = readerMapper.toEntity(createDto);
 

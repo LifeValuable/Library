@@ -2,6 +2,7 @@ package LifeValuable.Library.repository;
 
 import LifeValuable.Library.config.DataConfig;
 import LifeValuable.Library.model.Reader;
+import LifeValuable.Library.model.Role;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,8 @@ public class ReaderRepositoryTest {
         reader1.setEmail("alice_black@domen.com");
         reader1.setPhoneNumber("+79876543210");
         reader1.setRegistrationDate(LocalDate.now());
+        reader1.setPassword("password");
+        reader1.setRole(Role.READER);
 
         Reader reader2 = new Reader();
         reader2.setFirstName("Vasya");
@@ -48,6 +51,8 @@ public class ReaderRepositoryTest {
         reader2.setEmail("white@vasya.ru");
         reader2.setPhoneNumber("+70123456789");
         reader2.setRegistrationDate(LocalDate.now().minusDays(1));
+        reader2.setPassword("password");
+        reader2.setRole(Role.READER);
 
         entityManager.persist(reader1);
         entityManager.persist(reader2);
@@ -79,6 +84,8 @@ public class ReaderRepositoryTest {
         reader.setEmail("gubka@bob.com");
         reader.setPhoneNumber("+71234567890");
         reader.setRegistrationDate(LocalDate.now());
+        reader.setPassword("password");
+        reader.setRole(Role.READER);
 
         Reader savedReader = readerRepository.save(reader);
         assertThat(savedReader.getId()).isNotNull();
