@@ -17,4 +17,6 @@ public interface ReaderService {
 
     ReaderDetailDTO findByPhoneNumber(String number);
     ReaderDetailDTO findByEmail(String email);
+
+    ReaderDetailDTO updateCurrentUser(CreateReaderDTO dto, String currentEmail);
 }

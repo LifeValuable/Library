@@ -25,6 +25,7 @@ public interface ReaderMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "registrationDate", source = "createReaderDTO", qualifiedByName = "getCurrentDate")
     @Mapping(target = "lendings", ignore = true)
+    @Mapping(target = "role", ignore = true)
     Reader toEntity(CreateReaderDTO createReaderDTO);
 
     @Named("getFullName")

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -137,5 +138,35 @@ public class ReaderController {
             )
             String email) {
         return ResponseEntity.ok(readerService.findByEmail(email));
+    }
+
+
+    @Operation(summary = "Получение текущего читателя", description = "Возвращает подробную информацию об аутентифицированном читателе")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Читатель найден"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация")
+    })
+    @GetMapping("/me")
+    public ResponseEntity<ReaderDetailDTO> getMyProfile(Authentication auth) {
+        String email = auth.getName();
+        return ResponseEntity.ok(readerService.findByEmail(email));
+    }
+
+    @Operation(summary = "Обновить данные читателя", description = "Читатель обновляет информацию о себе")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Данные читателя успешно обновлены"),
+            @ApiResponse(responseCode = "401", description = "Требуется аутентификация"),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+            @ApiResponse(responseCode = "409", description = "Конфликт данных (email или телефон уже используются)")
+    })
+    @PutMapping("/me")
+    public ResponseEntity<ReaderDetailDTO> updateMyProfile(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Обновленные данные читателя", required = true)
+            @Valid @RequestBody CreateReaderDTO dto,
+            Authentication auth) {
+
+        String email = auth.getName();
+        return ResponseEntity.ok(readerService.updateCurrentUser(dto,email));
     }
 }

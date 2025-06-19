@@ -8,5 +8,6 @@ public record CreateReaderDTO(
     @NotBlank String firstName,
     @NotBlank String lastName,
     @NotBlank @Email String email,
-    @Pattern(regexp = "^(\\+[1-9][0-9]{7,14})?$") String phoneNumber) {
+    @Pattern(regexp = "^(\\+[1-9][0-9]{7,14})?$") String phoneNumber,
+    @NotBlank String password) {
 }

@@ -13,12 +13,17 @@ import java.util.List;
 public class Reader {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @NotBlank String firstName;
-    @NotBlank String lastName;
-    @NotBlank @Email String email;
-    @Pattern(regexp = "^(\\+[1-9][0-9]{7,14})?$") String phoneNumber;
-    @NotNull LocalDate registrationDate;
+    private Long id;
+    @NotBlank private  String firstName;
+    @NotBlank private String lastName;
+    @NotBlank @Email private String email;
+    @Pattern(regexp = "^(\\+[1-9][0-9]{7,14})?$") private String phoneNumber;
+    @NotNull private LocalDate registrationDate;
+
+    @NotBlank private String password;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull private Role role = Role.READER;
 
     @OneToMany(mappedBy = "reader", fetch = FetchType.LAZY)
     private List<Lending> lendings;

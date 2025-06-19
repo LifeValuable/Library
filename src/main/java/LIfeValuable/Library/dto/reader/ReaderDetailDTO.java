@@ -11,5 +11,6 @@ public record ReaderDetailDTO(
     LocalDate registrationDate,
     Integer activeLendingsCount,
     Integer overdueLendingsCount,
-    Integer totalBorrowed) {
+    Integer totalBorrowed,
+    String role) {
 }

@@ -6,11 +6,13 @@ import LifeValuable.Library.dto.reader.ReaderDetailDTO;
 import LifeValuable.Library.exception.ReaderNotFoundException;
 import LifeValuable.Library.mapper.ReaderMapper;
 import LifeValuable.Library.model.Reader;
+import LifeValuable.Library.model.Role;
 import LifeValuable.Library.repository.ReaderRepository;
 import LifeValuable.Library.service.ReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +20,15 @@ import java.time.LocalDate;
 
 @Service
 public class ReaderServiceImpl implements ReaderService {
-    private ReaderRepository readerRepository;
-    private ReaderMapper readerMapper;
+    private final ReaderRepository readerRepository;
+    private final ReaderMapper readerMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public ReaderServiceImpl(ReaderRepository readerRepository, ReaderMapper readerMapper) {
+    public ReaderServiceImpl(ReaderRepository readerRepository, ReaderMapper readerMapper, PasswordEncoder passwordEncoder) {
         this.readerRepository = readerRepository;
         this.readerMapper = readerMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     
@@ -38,6 +42,10 @@ public class ReaderServiceImpl implements ReaderService {
 
         Reader reader = readerMapper.toEntity(createReaderDTO);
         reader.setRegistrationDate(LocalDate.now());
+
+        reader.setPassword(passwordEncoder.encode(createReaderDTO.password()));
+        reader.setRole(Role.READER);
+
         Reader savedReader = readerRepository.save(reader);
         return readerMapper.toDetailDto(savedReader);
     }
@@ -57,6 +65,31 @@ public class ReaderServiceImpl implements ReaderService {
         readerToUpdate.setLastName(createReaderDTO.lastName());
         readerToUpdate.setEmail(createReaderDTO.email());
         readerToUpdate.setPhoneNumber(createReaderDTO.phoneNumber());
+
+        return readerMapper.toDetailDto(readerToUpdate);
+    }
+
+    @Transactional
+    @Override
+    public ReaderDetailDTO updateCurrentUser(CreateReaderDTO dto, String currentEmail) {
+        Reader readerToUpdate = readerRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new ReaderNotFoundException("email", currentEmail));
+
+        if (!readerToUpdate.getEmail().equals(dto.email()) &&
+                readerRepository.findByEmail(dto.email()).isPresent()) {
+            throw new RuntimeException("A reader with email " + dto.email() + " already exists");
+        }
+
+        if (!dto.phoneNumber().isEmpty() &&
+                !dto.phoneNumber().equals(readerToUpdate.getPhoneNumber()) &&
+                readerRepository.findByPhoneNumber(dto.phoneNumber()).isPresent()) {
+            throw new RuntimeException("A reader with phone number " + dto.phoneNumber() + " already exists");
+        }
+
+        readerToUpdate.setFirstName(dto.firstName());
+        readerToUpdate.setLastName(dto.lastName());
+        readerToUpdate.setEmail(dto.email());
+        readerToUpdate.setPhoneNumber(dto.phoneNumber());
 
         return readerMapper.toDetailDto(readerToUpdate);
     }

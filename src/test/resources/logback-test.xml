@@ -6,7 +6,6 @@
         </encoder>
     </appender>
 
-    <!-- Установка уровня логирования -->
     <root level="TRACE">
         <appender-ref ref="CONSOLE" />
     </root>
